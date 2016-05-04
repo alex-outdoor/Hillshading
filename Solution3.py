@@ -37,19 +37,29 @@ def Solution3(region,north,east):
 	file = Reproject(path,'{}_{}'.format(north,east),region) 
 	
 	# Use of gdaldem to get slope and aspect raster files 
-	aspectFile = get_aspect(file) 
+	aspectFile = get_aspect(file)
 	slopeFile = get_slope(file) 
 
-	# Computing of the hillshading files 
+	# Computing of the hillshading files - no_data has an output value of 0 (black pixel)
 	hillshadedFiles = HillShade.hillshade(file,azimuths,angle)
 
 	# Reading Metadatas to compute the output file at the end 
 	dataset_in = gdal.Open(file,GA_ReadOnly)
 	band_in = dataset_in.GetRasterBand(rasterBand)
 
-	# Reading the aspect raster file as a numpy array 
+	def get_no_data_value(file): 
+		""" Return the no_data value from a raster file """
+		dataset = gdal.Open(file,GA_ReadOnly)
+		band = dataset.GetRasterBand(rasterBand)
+		no_data_value = band.GetNoDataValue()
+		dataset = None
+		band = None
+	
+		return no_data_value
+
+	# Reading the aspect raster file as a numpy array - aspect.mask corresponds to no_data
 	aspect_raw = raster_to_numpy(aspectFile)
-	aspect = ma.masked_values(aspect_raw,-9999) # What to do with no_data values ? 
+	aspect = ma.masked_values(aspect_raw,get_no_data_value(aspectFile)) 
 
 	# Computation of local weight numpy arrays 
 	sum_array = np.zeros(aspect.shape)
@@ -68,7 +78,7 @@ def Solution3(region,north,east):
 
 	# Computing local incidents angles raster I
 	slope_raw = raster_to_numpy(slopeFile)
-	slope = ma.masked_values(slope_raw,-9999) # What to do with no_data values ? 
+	slope = ma.masked_values(slope_raw,get_no_data_value(slopeFile)) # slope.mask corresponds to no_data
 	initial_az = 315 
 	initial_alt = angle
 	I = math.cos(math.radians(initial_alt))*np.sin(np.radians(slope))*np.cos(np.radians(aspect-initial_az)) + math.sin(math.radians(initial_alt))*np.cos(np.radians(slope))
@@ -78,6 +88,10 @@ def Solution3(region,north,east):
 	# In this way, the closer to 90deg the incident angle gets, the more dominant is the role of
 	# multi-directional hill-shading in the final image.
 	Final = Blender*md_array + (1-Blender)*initial_array
+
+	# Explicitely 0 value for no_data (This is actually already computed automatically)
+	Final[aspect.mask] = 0 
+	Final[slope.mask] = 0 
 
 	# Generation of the output file 
 	outfile = '{reg}/Solution_{reg}_{n}_{e}.tif'.format(reg=region,n=north,e=east)
@@ -101,4 +115,11 @@ def Solution3(region,north,east):
 		os.remove(el)
 
 	return outfile
+
+
+if __name__ == '__main__': 
+
+	sol = Solution3('Switzerland','46','006')
+
+
 

@@ -17,9 +17,9 @@ from Solution3 import Solution3
 from PostProcessing import gdal_build_vrt 
 
 # Main variables 
-region = 'Belgium'
-N = ['50']
-E = ['002']
+region = 'Switzerland'
+N = ['46']
+E = ['006']
 
 # Getting the DEM files (format .bil)
 files = get_files(N,E,region)
