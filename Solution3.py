@@ -30,32 +30,18 @@ import HillShade
 def Solution3(region,north,east): 
 
 	# Global variables 
-	rasterBand = 1 # Both for Aspect and Slope files 
-	#region = 'Honolulu_Right'
-
-	# Files generation 
-	# Source : http://nationalmap.gov/viewer.html
-	# Rainier
-	#path = 'Data/ned19_n47x00_w122x00_wa_mounttrainier_2008/ned19_n47x00_w122x00_wa_mounttrainier_2008.img'
-	#path = 'Data/ned19_n47x00_w121x75_wa_mounttrainier_2008/ned19_n47x00_w121x75_wa_mounttrainier_2008.img'
-	# Kansas
-	#path = 'Data/ned19_n38x50_w101x00_ks_10countya1_2012/ned19_n38x50_w101x00_ks_10countya1_2012.img'
-	#path = 'Data/ned19_n38x50_w100x75_ks_10countya1_2012/ned19_n38x50_w100x75_ks_10countya1_2012.img'
-	#path = 'Data/Honolulu_right/grdn22w159_13/w001001.adf'
-	path = '{reg}/n{n}_e{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
-	file = Reproject(path,'{}_{}'.format(north,east),region) # Result : Rainier.tif
-	#file = 'Rainier.tif'
-
-	# Use of gdaldem to get slope and aspect raster files 
-	aspectFile = get_aspect(file) # Result : Rainier_aspect.tif
-	#aspectFile = 'Rainier_aspect.tif'
-	slopeFile = get_slope(file) # Result : Rainier_slope.tif
-	#slopeFile = 'Rainier_slope.tif'
-
 	azimuths = [225,270,315,360] 
 	angle = 30
+	rasterBand = 1 # Both for Aspect and Slope files 
+	path = '{reg}/n{n}_e{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
+	file = Reproject(path,'{}_{}'.format(north,east),region) 
+	
+	# Use of gdaldem to get slope and aspect raster files 
+	aspectFile = get_aspect(file) 
+	slopeFile = get_slope(file) 
+
+	# Computing of the hillshading files 
 	hillshadedFiles = HillShade.hillshade(file,azimuths,angle)
-	#hillshadedFiles = ['Rainier_225_30.tif','Rainier_270_30.tif','Rainier_315_30.tif','Rainier_360_30.tif']
 
 	# Reading Metadatas to compute the output file at the end 
 	dataset_in = gdal.Open(file,GA_ReadOnly)
@@ -63,18 +49,18 @@ def Solution3(region,north,east):
 
 	# Reading the aspect raster file as a numpy array 
 	aspect_raw = raster_to_numpy(aspectFile)
-	aspect = ma.masked_values(aspect_raw,-9999)
+	aspect = ma.masked_values(aspect_raw,-9999) # What to do with no_data values ? 
 
 	# Computation of local weight numpy arrays 
 	sum_array = np.zeros(aspect.shape)
-
 	for i,e in enumerate(azimuths): 
 		weight = (np.cos(np.radians(aspect-e)) + 1) / 2 # Each pixel has a value between 0 and 1 
 		hillshade = raster_to_numpy(hillshadedFiles[i])
 		weightedFile = weight * hillshade # This is not a matrix operation 
 		sum_array += weightedFile
 
-	md_array = sum_array / 4 # Multi-directional light source array 
+	# Multi-directional light source array 
+	md_array = sum_array / 4 
 
 	# Initial Hillshaded file - 315 degree azimuth with 30 degree elevation is considered the "natural way" 
 	Hillshade_initial = hillshadedFiles[2]
@@ -82,8 +68,7 @@ def Solution3(region,north,east):
 
 	# Computing local incidents angles raster I
 	slope_raw = raster_to_numpy(slopeFile)
-	slope = ma.masked_values(slope_raw,-9999)
-
+	slope = ma.masked_values(slope_raw,-9999) # What to do with no_data values ? 
 	initial_az = 315 
 	initial_alt = angle
 	I = math.cos(math.radians(initial_alt))*np.sin(np.radians(slope))*np.cos(np.radians(aspect-initial_az)) + math.sin(math.radians(initial_alt))*np.cos(np.radians(slope))
@@ -94,6 +79,7 @@ def Solution3(region,north,east):
 	# multi-directional hill-shading in the final image.
 	Final = Blender*md_array + (1-Blender)*initial_array
 
+	# Generation of the output file 
 	outfile = '{reg}/Solution_{reg}_{n}_{e}.tif'.format(reg=region,n=north,e=east)
 	driver = gdal.GetDriverByName('GTiff')
 	dataset_out = driver.Create(outfile,dataset_in.RasterXSize, dataset_in.RasterYSize, 1, band_in.DataType)
