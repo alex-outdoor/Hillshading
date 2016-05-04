@@ -17,12 +17,12 @@ from Solution3 import Solution3
 from PostProcessing import gdal_build_vrt 
 
 # Main variables 
-region = 'Switzerland'
-N = ['46']
-E = ['006']
+region = 'NorthCascade'
+N = ['48']
+E = ['121','122','123']
 
 # Getting the DEM files (format .bil)
-files = get_files(N,E,region)
+#files = get_files(N,E,region)
 
 # Actual computation 
 result = []

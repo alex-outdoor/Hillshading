@@ -31,9 +31,9 @@ def Solution3(region,north,east):
 
 	# Global variables 
 	azimuths = [225,270,315,360] 
-	angle = 30
+	angle = 40
 	rasterBand = 1 # Both for Aspect and Slope files 
-	path = '{reg}/n{n}_e{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
+	path = '{reg}/n{n}_w{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
 	file = Reproject(path,'{}_{}'.format(north,east),region) 
 	
 	# Use of gdaldem to get slope and aspect raster files 

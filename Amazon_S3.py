@@ -18,7 +18,7 @@ def get_files(N,E,region):
 	for n in N: 
 		for e in E: 
 			# Downloading data 
-			command = ['s3cmd get s3://srtm-30.openterrain.org/source/N{n}_E{e}_1arc_v3_bil.zip {reg}/{reg}_{n}_{e}.zip'.format(n=n,e=e,reg=region)]
+			command = ['s3cmd get s3://srtm-30.openterrain.org/source/N{n}_W{e}_1arc_v3_bil.zip {reg}/{reg}_{n}_{e}.zip'.format(n=n,e=e,reg=region)]
 			subprocess.call(command,shell=True) 
 
 			# Unzip data in the same folder 
@@ -30,7 +30,7 @@ def get_files(N,E,region):
 			subprocess.call('rm {reg}/{reg}_{n}_{e}.zip'.format(n=n,e=e,reg=region),shell=True)
 
 			# DEM files 
-			file = '{reg}/n{n}_e{e}_1arc_v3.bil'.format(n=n,e=e,reg=region)
+			file = '{reg}/n{n}_w{e}_1arc_v3.bil'.format(n=n,e=e,reg=region)
 			files.append(file)
 
 	return files 
