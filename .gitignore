@@ -1,0 +1,16 @@
+*.log
+*.pot
+*.pyc
+local_settings.py
+
+RNCProdCat_19115.xml
+
+.DS_Store
+.AppleDouble
+localSettings.py
+
+topomaps_all.zip
+
+topomaps_all.csv
+
+*.vrt
