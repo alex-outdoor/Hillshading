@@ -13,13 +13,13 @@ import numpy.ma as ma
 
 # Local imports 
 from Amazon_S3 import get_files 
-from Solution3 import Solution3 
+from Computation import Computation
 from PostProcessing import gdal_build_vrt 
 
 # Main variables 
-region = 'NorthCascade'
-N = ['48']
-E = ['121','122','123']
+region = 'Switzerland'
+N = ['46']
+E = ['006']
 
 # Getting the DEM files (format .bil)
 #files = get_files(N,E,region)
@@ -28,7 +28,7 @@ E = ['121','122','123']
 result = []
 for n in N: 
 	for e in E: 
-		solution = Solution3(region,n,e)
+		solution = Computation(region,n,e)
 		result.append(solution)
 
 # Merging the tiles result files together 

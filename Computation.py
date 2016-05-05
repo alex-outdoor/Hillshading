@@ -24,16 +24,16 @@ from osgeo.gdalconst import *
 
 # Local imports 
 from Aspect import get_aspect, get_slope
-from PreProcessing import translate_to_tif, Reproject, raster_to_numpy
+from PreProcessing import Reproject, raster_to_numpy
 import HillShade 
 
-def Solution3(region,north,east): 
+def Computation(region,north,east): 
 
 	# Global variables 
 	azimuths = [225,270,315,360] 
 	angle = 40
 	rasterBand = 1 # Both for Aspect and Slope files 
-	path = '{reg}/n{n}_w{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
+	path = '{reg}/n{n}_e{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
 	file = Reproject(path,'{}_{}'.format(north,east),region) 
 	
 	# Use of gdaldem to get slope and aspect raster files 
