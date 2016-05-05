@@ -16,6 +16,7 @@ def Reproject(input_file,output_file,region):
 	Output band data should be float type : -ot Float32  
 	Source : http://www.gdal.org/gdalwarp.html
 	"""
+	
 	base = 'gdalwarp' 
 	no_data = '-dstnodata -10000'
 	resampling = '-r lanczos'
@@ -48,4 +49,13 @@ def raster_to_numpy(fileName):
 	return data 
 
 
-
+def get_no_data_value(file): 
+	""" Return the no_data value from a raster file """
+	rasterBand = 1 
+	dataset = gdal.Open(file,GA_ReadOnly)
+	band = dataset.GetRasterBand(rasterBand)
+	no_data_value = band.GetNoDataValue()
+	dataset = None
+	band = None
+	
+	return no_data_value

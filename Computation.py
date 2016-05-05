@@ -24,14 +24,14 @@ from osgeo.gdalconst import *
 
 # Local imports 
 from Aspect import get_aspect, get_slope
-from PreProcessing import Reproject, raster_to_numpy
+from PreProcessing import Reproject, raster_to_numpy, get_no_data_value
 import HillShade 
 
 def Computation(region,north,east): 
 
 	# Global variables 
 	azimuths = [225,270,315,360] 
-	angle = 40
+	angle = 45
 	rasterBand = 1 # Both for Aspect and Slope files 
 	path = '{reg}/n{n}_e{e}_1arc_v3.bil'.format(reg=region,n=north,e=east)
 	file = Reproject(path,'{}_{}'.format(north,east),region) 
@@ -47,19 +47,10 @@ def Computation(region,north,east):
 	dataset_in = gdal.Open(file,GA_ReadOnly)
 	band_in = dataset_in.GetRasterBand(rasterBand)
 
-	def get_no_data_value(file): 
-		""" Return the no_data value from a raster file """
-		dataset = gdal.Open(file,GA_ReadOnly)
-		band = dataset.GetRasterBand(rasterBand)
-		no_data_value = band.GetNoDataValue()
-		dataset = None
-		band = None
-	
-		return no_data_value
-
-	# Reading the aspect raster file as a numpy array - aspect.mask corresponds to no_data
-	aspect_raw = raster_to_numpy(aspectFile)
-	aspect = ma.masked_values(aspect_raw,get_no_data_value(aspectFile)) 
+	# Reading the aspect raster file as a numpy array - aspect_m.mask corresponds to no_data
+	aspect = raster_to_numpy(aspectFile)
+	aspect_m = ma.masked_values(aspect,get_no_data_value(aspectFile)) 
+	aspect[aspect_m.mask] = 0 # no_data values put to 0 (same than -zero_for_flat)
 
 	# Computation of local weight numpy arrays 
 	sum_array = np.zeros(aspect.shape)
@@ -77,8 +68,10 @@ def Computation(region,north,east):
 	initial_array = raster_to_numpy(Hillshade_initial)
 
 	# Computing local incidents angles raster I
-	slope_raw = raster_to_numpy(slopeFile)
-	slope = ma.masked_values(slope_raw,get_no_data_value(slopeFile)) # slope.mask corresponds to no_data
+	slope = raster_to_numpy(slopeFile)
+	slope_m = ma.masked_values(slope,get_no_data_value(slopeFile)) # slope_m.mask corresponds to no_data
+	slope[slope_m.mask] = 0 # no_data values put to 0
+
 	initial_az = 315 
 	initial_alt = angle
 	I = math.cos(math.radians(initial_alt))*np.sin(np.radians(slope))*np.cos(np.radians(aspect-initial_az)) + math.sin(math.radians(initial_alt))*np.cos(np.radians(slope))
@@ -89,16 +82,18 @@ def Computation(region,north,east):
 	# multi-directional hill-shading in the final image.
 	Final = Blender*md_array + (1-Blender)*initial_array
 
-	# Explicitely 0 value for no_data (This is actually already computed automatically)
-	Final[aspect.mask] = 0 
-	Final[slope.mask] = 0 
+	# Explicitely -10000 value for no_data 
+	value = -10000
+	Final[aspect_m.mask] = value
+	Final[slope_m.mask] = value
 
 	# Generation of the output file 
 	outfile = '{reg}/Solution_{reg}_{n}_{e}.tif'.format(reg=region,n=north,e=east)
 	driver = gdal.GetDriverByName('GTiff')
 	dataset_out = driver.Create(outfile,dataset_in.RasterXSize, dataset_in.RasterYSize, 1, band_in.DataType)
-	CopyDatasetInfo(dataset_in,dataset_out) # Copy all the MetaData's (info, projection geotransform,etc..) 
+	CopyDatasetInfo(dataset_in,dataset_out) # Copy all the MetaData's (info, projection geotransform, etc..) 
 	band_out = dataset_out.GetRasterBand(1)
+	band_out.SetNoDataValue(value)
 	BandWriteArray(band_out, Final)
 
 	# Close the datasets

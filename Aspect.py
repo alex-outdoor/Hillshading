@@ -7,6 +7,7 @@ def get_aspect(input_dem):
 	Each pixel has a value [0-360] indicating azimuth 
 	"""
 	out_file = input_dem.split('.')[0] + '_aspect.tif'
+	option = '-zero_for_flat' # put no_data value at 0 instead of -9999
 	command = ['gdaldem aspect' + ' ' + input_dem + ' ' + out_file]
 	subprocess.call(command,shell=True) 
 
