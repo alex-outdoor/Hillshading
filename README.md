@@ -1,15 +1,8 @@
 Hillshading Project 
 ===================
 
-![NorthCascade](Pictures/NorthCascade_40degree.png)
-![NorthCascade](Pictures/LemanLake_Switzerland.png)
-
-Purposes : 
-----------
-
-
-Algorithm used : 
-----------------
+![NorthCascade](Pictures/FrenchSwiss.png)
+That features the natural border between France (left) and Switzerland (right)
 
 
 

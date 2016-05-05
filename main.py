@@ -19,7 +19,7 @@ from PostProcessing import gdal_build_vrt
 # Main variables 
 region = 'Switzerland'
 N = ['46']
-E = ['006']
+E = ['004','005','006']
 
 # Getting the DEM files (format .bil)
 files = get_files(N,E,region)
