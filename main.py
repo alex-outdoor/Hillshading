@@ -22,7 +22,7 @@ N = ['46']
 E = ['006']
 
 # Getting the DEM files (format .bil)
-#files = get_files(N,E,region)
+files = get_files(N,E,region)
 
 # Actual computation 
 result = []

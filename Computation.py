@@ -24,7 +24,7 @@ from osgeo.gdalconst import *
 
 # Local imports 
 from Aspect import get_aspect, get_slope
-from PreProcessing import Reproject, raster_to_numpy, get_no_data_value
+from PreProcessing import Reproject, raster_to_numpy, get_no_data_value, get_smoother
 import HillShade 
 
 def Computation(region,north,east): 
