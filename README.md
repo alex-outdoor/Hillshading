@@ -1,9 +1,11 @@
 Hillshading Project 
 ===================
 
+![NorthCascade](Pictures/NorthCascade_40degree.png)
+
+
 Purposes : 
 ----------
-
 
 
 Algorithm used : 
@@ -11,7 +13,3 @@ Algorithm used :
 
 
 
-Some results : 
---------------
-
-![NorthCascade](Pictures/NorthCascade_40degree.png)
