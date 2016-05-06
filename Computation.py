@@ -93,7 +93,7 @@ def Computation(region,north,east):
 	dataset_out = driver.Create(outfile,dataset_in.RasterXSize, dataset_in.RasterYSize, 1, band_in.DataType)
 	CopyDatasetInfo(dataset_in,dataset_out) # Copy all the MetaData's (info, projection geotransform, etc..) 
 	band_out = dataset_out.GetRasterBand(1)
-	band_out.SetNoDataValue(value)
+	band_out.SetNoDataValue(value) # Didn't specify yet bound values for the output -> Guees it will depend of how the layer will be used
 	BandWriteArray(band_out, Final)
 
 	# Close the datasets
